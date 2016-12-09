@@ -9,6 +9,7 @@ function checkname() {
     var name = $("#form input[name='name']").val();
     if (!(/^[\u4e00-\u9fa5_a-zA-Z]{1,30}$/.test(name))) {
         $("#form input[name='name']").data("success", false).next().fadeIn(300);
+        
     } else {
         $("#form input[name='name']").data("success", true).next().fadeOut(300);
     }
@@ -18,11 +19,22 @@ function checkphone() {
     var phone = $("#form input[name='phone']").val();
     if (!(/^\d{11}$/.test(phone))) {
         $("#form input[name='phone']").data("success", false).next().fadeIn(300);
+        
     } else {
         $("#form input[name='phone']").data("success", true).next().fadeOut(300);
     }
     return phone;
 }
+function checkemail() {
+    var email = $("#form input[name='email']").val();
+    if (!(/^[a-z0-9]+([._\\-]*[a-z0-9])*@([a-z0-9]+[-a-z0-9]*[a-z0-9]+.){1,63}[a-z0-9]+$/.test(email))) {
+        $("#form input[name='email']").data("success", false).next().fadeIn(300);
+    } else {
+        $("#form input[name='email']").data("success", true).next().fadeOut(300);
+    }
+    return email;
+}
+
 function checkaddress() {
     var address = $("#form input[name='address']").val();
     if (!(/^[\u4e00-\u9fa5_a-zA-Z0-9_]{1,30}$/.test(address))) {
@@ -52,3 +64,4 @@ function delCookie(name) {
     if (cval != null)
         document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
 }
+

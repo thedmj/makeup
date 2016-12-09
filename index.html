@@ -21,18 +21,21 @@
             <div id="console"></div>
         <form action="" id="form">
             <p>
-                <input type="text" name="name" onblur="checkname()" data-success="false"/>
+                <input type="text" name="name" onblur="checkname()" data-success="false" placeholder="请输入你的名字"/>
             </p>
             <p>
-                <input type="text" name="phone" onblur="checkphone()" data-success="false"/>
+                <input type="text" hidden name="phone" onblur="checkphone()" data-success="false" value="11111111111"/>
             </p>
             <p>
-                <input type="text" name="email" data-success="false"/>
+                <input type="text" hidden name="email" onblur="checkemail()" data-success="false" value="qwe@tt.com"/>
             </p>
             
         </form>
         <img src="" id="headimg" />
-        <button id="submit" class="btn">提交</button>
+        <br/>
+        <br/>
+        <br/>
+        <div id="submit" class="btn">提交</div>
         </div>
     </div>
 <script>

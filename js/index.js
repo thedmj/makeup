@@ -27,21 +27,23 @@ function browserRedirect() {
 
 var browser = browserRedirect();
 var input = null;
+var headimg ="";
+var name="";
 //input位置
 function inputrest() {
-        $(window).on("resize", function() {
-            if (window.innerHeight > 1000) {
-                $("#form").css("top", "1rem");
-            }
-        })
-        $("#form input").on("focus", function() {
-            input = this;
-            setTimeout(function() {
-                $("#form").css("top", (window.innerHeight) / 2 - $(input).position().top);
-            }, 600);
-        });
-    }
-$(document).on("ready", function() {
+    $(window).on("resize", function () {
+        if (window.innerHeight > 1000) {
+            $("#form").css("top", "1rem");
+        }
+    })
+    $("#form input").on("focus", function () {
+        input = this;
+        setTimeout(function () {
+            $("#form").css("top", (window.innerHeight) / 2 - $(input).position().top);
+        }, 600);
+    });
+}
+$(document).on("ready", function () {
     // e.preventDefault();
     // var e = browser.type == "pc" ? e : e.originalEvent.changedTouches[0];
     var url = window.location.href;
@@ -62,114 +64,151 @@ $(document).on("ready", function() {
         }
     });
     wx.ready(function () {
-        
         // config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，所以如果需要在页面加载时
         // 就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
     });
-   //登录判断
-    var host = "localhost/makeup/index.html"
+    //登录判断
+    var host = "test.mymanna.me/index.html"
     var openId = $.getUrlParam("openid");
-    if(openId === null){
-        window.location.href = "http://sym.tms.im/login?returnurl="+host; //获取自己的openid
-    }else{
-        //判断下 openid 看看是不是第一次玩
-        // $.ajax({
-        //     url:"http://sym.tms.im/queryopenid",
-        //     type:"POST",
-        //     data:{
-        //         openid:openId
-        //     },
-        //     success:function(res){
-        //         var res = JSON.parse(res);
-        //         if(res.status===0){ //错误
-        //             console.log(res);
-        //         }else if(res.status===1){
-        //             //已经玩过 dosomething...
-        //             alert("已经玩过了");
-        //             getresult(openId);//已经玩过就查看结果
-        //         }else if(res.status ===2 ){
-                    
-        //         }
-        //     }
-        // });
+    if (openId === null) {
+        window.location.href = "http://sym.tms.im/login?returnurl=" + host; //获取自己的openid
+    } else {
+        // 判断下 openid 看看是不是第一次玩
+        $.ajax({
+            url: "http://sym.tms.im/queryopenid",
+            type: "POST",
+            data: {
+                openid: openId
+            },
+            success: function (res) {
+                var res = JSON.parse(res);
+                if (res.status === 0) { //错误
+                    console.log(res);
+                } else if (res.status === 1) {
+                    //已经玩过 dosomething...
+                    // alert("已经玩过了");
+                    setShare(res.sharekey);
+                    getresult(openId);//已经玩过就查看结果
+                } else if (res.status === 2) {
+                    start();
+                }
+            }
+        });
 
-        start();//第一次玩
+        // start();//第一次玩
     }
 
-    function getresult(openid){ //查看应约结果
-    $.ajax({
-        url:"http://sym.tms.im/queryaccept",
-        type:"POST",
-        data:{
-            openid:openid
-        },
-        success:function(res){
-            console.log(res);
-            
-        }
-    });
-}
+    function getresult(openid) { //查看应约结果
+        $.ajax({
+            url: "http://sym.tms.im/queryaccept",
+            type: "POST",
+            data: {
+                openid: openid
+            },
+            success: function (res) {
+                console.log(res);
+                var html = "接受你邀请的人为：";
+                res.list.map(function (o, i) {
+                    html += o.name + "   ";
+                });
+                $("#main").fadeIn().html(html).css("color", "red");
+
+            }
+        });
+    }
     //开始
-    function start(){
+    function start() {
         $("#main").fadeIn();
         $.ajax({
-            url:"http://sym.tms.im/userinfo",
-            type:"GET",
-            data:{openid:openId},
-            success:function(res){
+            url: "http://sym.tms.im/userinfo",
+            type: "GET",
+            data: { openid: openId },
+            success: function (res) {
                 var res = JSON.parse(res);
-                if(res.status === 1){
-                    $("#headimg").attr("src",res.headimg);
+                if (res.status === 1) {
+                    console.log(res);
+                    $("#headimg").attr("src", res.headimg);
+                    name = res.name;
+                    headimg = res.headimg;
                 }
             }
         });
         submit();
     }
-    function submit(){
-        $("#submit").on(browser.mousedown,function(){
+    function submit() {  //提交
+        $("#submit").on(browser.mousedown, function () {
             var name = checkname();
             var phone = checkphone();
-            if($("#form input[name='name']").data("success")&&$("#form input[name='phone']").data("success")){
+            var email = checkemail();
+            console.log(name, phone, email);
+            if ($("#form input[name='name']").data("success") && $("#form input[name='phone']").data("success") && $("#form input[name='email']").data("success")) {
+                // alert("验证通过，开始提交")
                 $.ajax({
-                    url:"http://sym.tms.im/submit",
-                    type:"POST",
-                    data:{
-                        openid:openId,
-                        name:name,
-                        phone:phone,
-                        email:"aaa@163.com",
-                        scene:1,
-
+                    url: "http://sym.tms.im/submit",
+                    type: "POST",
+                    data: {
+                        openid: openId,
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        scene: 1,
                     },
-                    success:function(res){
+                    success: function (res) {
                         //提交成功后 设置分享接口
+                        // alert("提交成功");
                         var res = JSON.parse(res);
                         var sharekey = res.sharekey;
-                        if(res.status === 1){
-                            wx.onMenuShareAppMessage({
-                            title: '声色犬马', // 分享标题
-                            desc: '声色犬马', // 分享描述
-                            link: window.location.href+sharekey, // 分享链接
-                            imgUrl: 'http://static.mymanna.me/makeupforever/share.jpg', // 分享图标
-                            type: '', // 分享类型,music、video或link，不填默认为link
-                            dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
-                            success: function () {
-                                alert("success");
-                            },
-                            cancel: function () {
-                                alert("cancel");
-                            }
-        });
+                        console.log("sharekey: " + sharekey);
+                        alert("提交成功！ 请点击右上角分享给朋友");
+                        if (res.status === 1) {
+                            setShare(sharekey);
                         }
+                    },
+                    error: function (err) {
+                        alert("提交失败");
+
+                        console.log(err);
                     }
                 });
-            }else{
-                // alert("error");
+            } else {
+                alert("验证错误");
+                $("#console").html("checkerror");
+                setTimeout(function () {
+                    $("#console").html("");
+                }, 1000);
             }
         });
-        
+
     }
-    
+    function setShare(sharekey) {
+        wx.onMenuShareAppMessage({
+            title: name+"分享给你一个邀请函", // 分享标题
+            desc: '测试', // 分享描述
+            link: "http://test.mymanna.me/reply.html?sharekey=" + sharekey, // 分享链接
+            imgUrl: headimg, // 分享图标
+            type: '', // 分享类型,music、video或link，不填默认为link
+            dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+            success: function () {
+                // alert("success");
+                window.location.href = "http://www.baidu.com";
+            },
+            cancel: function () {
+                // alert("cancel");
+            }
+        });
+        wx.onMenuShareTimeline({
+            title: name+"分享给你一个邀请函", // 分享标题
+            link: "http://test.mymanna.me/reply.html?sharekey=" + sharekey, // 分享链接
+            imgUrl: headimg, // 分享图标
+            success: function () {
+                // 用户确认分享后执行的回调函数
+                window.location.href = "http://www.baidu.com";
+            },
+            cancel: function () {
+                // 用户取消分享后执行的回调函数
+            }
+        });
+    }
 
 });
 
