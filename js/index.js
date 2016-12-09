@@ -27,8 +27,8 @@ function browserRedirect() {
 
 var browser = browserRedirect();
 var input = null;
-var headimg ="";
-var name="";
+var headimg = "";
+var name = "";
 //input位置
 function inputrest() {
     $(window).on("resize", function () {
@@ -87,10 +87,18 @@ $(document).on("ready", function () {
                 } else if (res.status === 1) {
                     //已经玩过 dosomething...
                     // alert("已经玩过了");
-                    setShare(res.sharekey);
-                    getresult(openId);//已经玩过就查看结果
-                } else if (res.status === 2) {
-                    start();
+                    getuserinfo(function () {
+                        setTimeout(function () {
+                            setShare(res.sharekey);
+                            getresult(openId);//已经玩过就查看结果
+                        }, 1000);
+
+                    });
+                } else if (res.status === 2) { //没玩过就请求下自己的信息 执行start
+                    getuserinfo(function () {
+                        start();
+                    });
+
                 }
             }
         });
@@ -116,9 +124,8 @@ $(document).on("ready", function () {
             }
         });
     }
-    //开始
-    function start() {
-        $("#main").fadeIn();
+
+    function getuserinfo(callback) { //设置用户信息 拿到名字 头像等信息
         $.ajax({
             url: "http://sym.tms.im/userinfo",
             type: "GET",
@@ -127,12 +134,18 @@ $(document).on("ready", function () {
                 var res = JSON.parse(res);
                 if (res.status === 1) {
                     console.log(res);
-                    $("#headimg").attr("src", res.headimg);
-                    name = res.name;
-                    headimg = res.headimg;
+                    window.name = res.name;
+                    window.headimg = res.headimg;
+                    // alert(name);
+                    callback();
                 }
             }
         });
+    }
+    //开始
+    function start() {
+        $("#main").fadeIn();
+        $("#headimg").attr("src", headimg);
         submit();
     }
     function submit() {  //提交
@@ -182,7 +195,7 @@ $(document).on("ready", function () {
     }
     function setShare(sharekey) {
         wx.onMenuShareAppMessage({
-            title: name+"分享给你一个邀请函", // 分享标题
+            title: name + "分享给你一个邀请函", // 分享标题
             desc: '测试', // 分享描述
             link: "http://test.mymanna.me/reply.html?sharekey=" + sharekey, // 分享链接
             imgUrl: headimg, // 分享图标
@@ -191,21 +204,15 @@ $(document).on("ready", function () {
             success: function () {
                 // alert("success");
                 window.location.href = "http://www.baidu.com";
-            },
-            cancel: function () {
-                // alert("cancel");
             }
         });
         wx.onMenuShareTimeline({
-            title: name+"分享给你一个邀请函", // 分享标题
+            title: name + "分享给你一个邀请函", // 分享标题
             link: "http://test.mymanna.me/reply.html?sharekey=" + sharekey, // 分享链接
             imgUrl: headimg, // 分享图标
             success: function () {
                 // 用户确认分享后执行的回调函数
                 window.location.href = "http://www.baidu.com";
-            },
-            cancel: function () {
-                // 用户取消分享后执行的回调函数
             }
         });
     }
