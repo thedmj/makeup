@@ -88,17 +88,14 @@ $(document).on("ready", function () {
                     //已经玩过 dosomething...
                     // alert("已经玩过了");
                     getuserinfo(function () {
-                        setTimeout(function () {
-                            setShare(res.sharekey);
-                            getresult(openId);//已经玩过就查看结果
-                        }, 1000);
-
+                        setShare(res.sharekey);
+                        getresult(openId);//已经玩过就查看结果
+                        
                     });
                 } else if (res.status === 2) { //没玩过就请求下自己的信息 执行start
                     getuserinfo(function () {
                         start();
                     });
-
                 }
             }
         });
@@ -136,7 +133,6 @@ $(document).on("ready", function () {
                     console.log(res);
                     window.name = res.name;
                     window.headimg = res.headimg;
-                    // alert(name);
                     callback();
                 }
             }
@@ -171,8 +167,8 @@ $(document).on("ready", function () {
                         // alert("提交成功");
                         var res = JSON.parse(res);
                         var sharekey = res.sharekey;
-                        console.log("sharekey: " + sharekey);
-                        alert("提交成功！ 请点击右上角分享给朋友");
+                        // console.log("sharekey: " + sharekey);
+                        $("#console").html("提交成功！ 请点击右上角分享给朋友");    
                         if (res.status === 1) {
                             setShare(sharekey);
                         }
@@ -194,7 +190,8 @@ $(document).on("ready", function () {
 
     }
     function setShare(sharekey) {
-        wx.onMenuShareAppMessage({
+        wx.ready(function(){
+            wx.onMenuShareAppMessage({
             title: name + "分享给你一个邀请函", // 分享标题
             desc: '测试', // 分享描述
             link: "http://test.mymanna.me/reply.html?sharekey=" + sharekey, // 分享链接
@@ -205,16 +202,18 @@ $(document).on("ready", function () {
                 // alert("success");
                 window.location.href = "http://www.baidu.com";
             }
+            });
+            wx.onMenuShareTimeline({
+                title: name + "分享给你一个邀请函", // 分享标题
+                link: "http://test.mymanna.me/reply.html?sharekey=" + sharekey, // 分享链接
+                imgUrl: headimg, // 分享图标
+                success: function () {
+                    // 用户确认分享后执行的回调函数
+                    window.location.href = "http://www.baidu.com";
+                }
+            });
         });
-        wx.onMenuShareTimeline({
-            title: name + "分享给你一个邀请函", // 分享标题
-            link: "http://test.mymanna.me/reply.html?sharekey=" + sharekey, // 分享链接
-            imgUrl: headimg, // 分享图标
-            success: function () {
-                // 用户确认分享后执行的回调函数
-                window.location.href = "http://www.baidu.com";
-            }
-        });
+      
     }
 
 });
